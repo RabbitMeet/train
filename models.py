@@ -225,14 +225,7 @@ class F3Net(nn.Module):
         self.head = nn.Linear(config.hidden_size, num_classes)#wm,768-->10
 
         # init branches
-        if mode == 'FAD' or mode == 'Both' or mode == 'Mix' or mode == 'Both2':
-            self.FAD_head = FAD_Head(img_size)
-            self.init_xcep_FAD()
-            
 
-        if mode == 'LFS' or mode == 'Both' or mode == 'Mix':
-            self.LFS_head = LFS_Head(img_size,LFS_window_size,LFS_M)
-            self.init_xcep_LFS()
 
         if mode == 'IDWT'or mode == 'Both2':
             self.IDWT_head = IDWT_Head(img_size)
