@@ -17,7 +17,7 @@ batch_size = 64
 gpu_ids = [*range(osenvs)]
 max_epoch = 30 
 loss_freq = 500 
-mode = 'Original' # ['Original', 'Both2', 'bag3', 'Both', 'Mix' , 'DWT']
+mode = 'Original' # ['Original', 'Both2', 'bag3', 'Both', 'Mix' , 'DWT']#...
 ckpt_dir = './ckpts'
 ckpt_name = '8'
 
