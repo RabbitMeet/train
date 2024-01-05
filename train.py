@@ -12,17 +12,17 @@ import random
 
 # config
 dataset_path ='./DFDC/'
-pretrained_path = './pretrained/xception-b5690688.pth'
+pretrained_path = ''
 batch_size = 64 
 gpu_ids = [*range(osenvs)]
 max_epoch = 30 
 loss_freq = 500 
-mode = 'Original' # ['Original', 'Both2', 'bag3', 'Both', 'Mix' , 'DWT']#...
+mode = 'Original'
 ckpt_dir = './ckpts'
 ckpt_name = '8'
 
 if __name__ == '__main__':
-    dataset = FFDataset(dataset_root=os.path.join(dataset_path, 'train' ,'real'), size=256, frame_num=800000, augment=True)#os.path.join是路径拼接，也就是dataset_path\train\real路径
+    dataset = FFDataset(dataset_root=os.path.join(dataset_path, 'train' ,'real'), size=256, frame_num=8, augment=True)#os.path.join是路径拼接，也就是dataset_path\train\real路径
     dataloader_real = torch.utils.data.DataLoader(
         dataset=dataset,#数据读取接口,该输出是torch.utils.data.Dataset类的对象(或者继承自该类的自定义类的对象)
         batch_size=batch_size // 2,#批训练数据量大小
@@ -31,7 +31,7 @@ if __name__ == '__main__':
     
     len_dataloader = dataloader_real.__len__()#长度
 
-    dataset_img, total_len =  get_dataset(name='train', size=256, root=dataset_path, frame_num=800000, augment=True)
+    dataset_img, total_len =  get_dataset(name='train', size=256, root=dataset_path, frame_num=8, augment=True)
     dataloader_fake = torch.utils.data.DataLoader(#该接口主要用来将自定义的数据读取接口的输出或者PyTorch已有的数据读取接口的输入按照batch_size封装成Tensor
         dataset=dataset_img,
         batch_size=batch_size // 2,
