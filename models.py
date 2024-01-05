@@ -1,4 +1,4 @@
-from xception import Xception,Xception1
+from xception import Xception
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -28,7 +28,6 @@ class Filter(nn.Module):
         self.norm = norm
         if norm:
             self.ft_num = nn.Parameter(torch.sum(torch.tensor(generate_filter(band_start, band_end, size))), requires_grad=False)
-
 
     def forward(self, x):
         if self.use_learnable:
@@ -81,7 +80,6 @@ class IDWT_Head(nn.Module):
         cH = torch.from_numpy(cH)
         cV = torch.from_numpy(cV)
         cD = torch.from_numpy(cD)
-        image = torch.cat([cH, cV, cD],dim =1)
         return image
 
 class DWT_Head(nn.Module):
@@ -122,47 +120,9 @@ class DWT_Head(nn.Module):
             #img21 = torch.cat([map['hh'], map['vh'], map['dh']],dim =1)
             #img22 = torch.cat([map['hv'], map['vv'], map['dv']],dim =1)
             #img23 = torch.cat([map['hd'], map['vd'], map['dd']],dim =1)
-        image = torch.cat([img2[0],img2[1],img2[2]],dim =1)
         # print('image',image.shape)torch.Size([16, 9, 299, 299])
         return image
       
-class Bag_Head(nn.Module):
-    def __init__(self, maxlevel):
-        self.maxlevel = maxlevel
-        super(Bag_Head, self).__init__()
-    def forward(self,img):
-        #print('img',img.shape)#img torch.Size([16, 3, 299, 299])
-        x_gray = 0.299*img[:,2,:,:] + 0.587*img[:,1,:,:] + 0.114*img[:,0,:,:]#x1 torch.Size([16, 299, 299])
-        x = x_gray.unsqueeze(1)#x2 torch.Size([16, 299, 299])
-        # rescale to 0 - 255
-        x = (x + 1.) * 122.5
-        x = x.cpu().numpy()
-        wp = pywt.WaveletPacket2D(data=x, wavelet='haar',mode='symmetric',maxlevel=self.maxlevel)
- 
-    #计算每一个节点的系数，存在map中，key为'aa'等，value为列表
-        map = {}
-        map[1] = x
-        a=nn.Upsample(size = (256,256),mode='bilinear',align_corners=True )
-        for row in range(1,self.maxlevel+1):
-            lev = []
-            for i in [node.path for node in wp.get_level(row, 'natural')]:
-                map[i] = wp[i].data
-                #print('map[i]:',map[i].shape)#torch.Size([8, 1, 75, 75])
-                map[i] = torch.from_numpy(map[i])
-                #print('map[i]:',map[i].shape)#torch.Size([8, 1, 75, 75])
-                map[i] = a(map[i])
-                #print('map[i]:',map[i].shape)
-                #print('i',i,map[i].shape)
-        img1 = torch.cat([map['h'], map['v'], map['d']],dim =1)
-        # print('img1',img1.shape)torch.Size([16, 3, 299, 299])
-        img21 = torch.cat([map['hh'], map['vh'], map['dh']],dim =1)
-        img22 = torch.cat([map['hv'], map['vv'], map['dv']],dim =1)
-        img23 = torch.cat([map['hd'], map['vd'], map['dd']],dim =1)
-        image = torch.cat([img21,img22,img23],dim =1)
-        # print('image',image.shape)torch.Size([16, 9, 299, 299])
-        return img1,image
-
-
 class Bag_Head3(nn.Module):
     def __init__(self, maxlevel):
         self.maxlevel = maxlevel
@@ -202,8 +162,6 @@ class Bag_Head3(nn.Module):
             img3.append(torch.cat([map['vh'], map['vv'], map['vd']],dim =1))
             img4.append(torch.cat([map['dh'], map['dv'], map['dd']],dim =1))
             
-        image1 = torch.cat([img1[0],img1[1],img1[2]],dim =1)
-        image2 = torch.cat([img2[0],img2[1],img2[2],img3[0],img3[1],img3[2],img4[0],img4[1],img4[2]],dim =1)#,img5[0],img5[1],img5[2]
         return image1,image2
 
 class F3Net(nn.Module):
@@ -252,8 +210,7 @@ class F3Net(nn.Module):
         # classifier
         self.conv = nn.Conv2d(in_channels=2048, out_channels=2048, kernel_size=1)
         self.relu = nn.ReLU(inplace=True)
-        self.fc1 = nn.Linear(4096 if self.mode == 'Bag' else 2048, num_classes)#or self.mode == 'Both2'
-        self.fc = nn.Linear(4096 if self.mode == 'Bag' or self.mode == 'Bag3' or self.mode == 'Mix' or self.mode == 'OUR'  else 2048, num_classes)#or self.mode == 'Both2'
+        self.fc = nn.Linear(2048, num_classes)
         self.dp = nn.Dropout(p=0.2)
 
     def init_xcep_FAD(self):#放进网络的形式大概是
