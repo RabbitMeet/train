@@ -15,7 +15,7 @@ class Trainer():
         self.device = torch.device('cuda:{}'.format(gpu_ids[0])) if gpu_ids else torch.device('cpu')#调用指定GPU 
         self.model = F3Net(config,mode=mode, device=self.device)
         self.model = initModel(self.model, gpu_ids)#返回放入GPU多卡训练后的mod 问题：.double：Input type (torch.cuda.DoubleTensor) and weight type (torch.cuda.FloatTensor) should be the same
-        self.loss_fn = nn.BCEWithLogitsLoss()#二元交叉熵损失函数
+        self.loss_fnc = nn.BCEWithLogitsLoss()#二元交叉熵损失函数
         self.optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, self.model.parameters()),#从参数tensor集合-- parameters中找到可变的tensor形成一个新的集合
                                               lr=0.0002, betas=(0.9, 0.999))#adam优化器（待优化参数，学习率，一阶矩估计的衰减率，二阶矩估计的衰减率
     def set_input(self, input, label):
