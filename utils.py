@@ -21,8 +21,7 @@ class FFDataset(data.Dataset):
             self.transform = trans.Compose([trans.ToPILImage(),trans.RandomHorizontalFlip(p=0.5), trans.ToTensor()])#常用图像变换.水平翻转概率0.5.转换为tensor类
       
         else:
-            #self.transform = trans.Compose([trans.RandomHorizontalFlip(p=0.5), trans.ToTensor()])
-            self.transform = trans.ToTensor()#修改后必须进行翻转
+            self.transform = trans.Compose([trans.RandomHorizontalFlip(p=0.5), trans.ToTensor()])
             
         self.max_val = 1.#参数的最大值
         self.min_val = -1.
@@ -85,8 +84,8 @@ def evaluate(model, data_path, mode='valid'):
     origin_root = root
     root = os.path.join(data_path, mode)
     real_root = os.path.join(root,'real')
-    dataset_real = FFDataset(dataset_root=real_root, size=256, frame_num=800000, augment=False)
-    dataset_fake, _ = get_dataset(name=mode, root=origin_root, size=256, frame_num=800000, augment=False)
+    dataset_real = FFDataset(dataset_root=real_root, size=256, frame_num=8, augment=False)
+    dataset_fake, _ = get_dataset(name=mode, root=origin_root, size=256, frame_num=8, augment=False)
     dataset_img = torch.utils.data.ConcatDataset([dataset_real, dataset_fake])#ConcatDataset数据处理.合并子集
 
     bz = 64
